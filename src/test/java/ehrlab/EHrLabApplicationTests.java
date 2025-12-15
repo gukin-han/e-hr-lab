@@ -1,4 +1,4 @@
-package com.example.ehrlab;
+package ehrlab;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

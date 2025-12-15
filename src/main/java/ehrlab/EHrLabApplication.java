@@ -1,4 +1,4 @@
-package com.example.ehrlab;
+package ehrlab;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
