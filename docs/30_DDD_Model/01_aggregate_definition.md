@@ -11,7 +11,7 @@
 classDiagram
     class LeaveAccount {
         +Long id
-        +Long memberId
+        +Long employeeId
         +requestLeave()
         +cancelLeave()
     }
