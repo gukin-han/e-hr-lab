@@ -2,8 +2,7 @@ package ehrlab.attendance.api;
 
 import jakarta.validation.constraints.NotNull;
 
-public record CheckRequest(
+public record CheckInRequest(
     @NotNull Long tenantId,
-    @NotNull Long employeeId,
-    @NotNull String type
+    @NotNull Long employeeId
 ) {}

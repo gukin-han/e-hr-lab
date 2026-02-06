@@ -1,8 +1,9 @@
 package ehrlab.attendance.api;
 
 import ehrlab.attendance.application.AttendanceService;
+import ehrlab.attendance.application.CheckInCommand;
+import ehrlab.attendance.application.CheckOutCommand;
 import ehrlab.attendance.application.CheckResult;
-import ehrlab.attendance.domain.RecordType;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,22 +18,35 @@ public class AttendanceController {
         this.attendanceService = attendanceService;
     }
 
-    @PostMapping("/check")
-    public ResponseEntity<CheckResponse> check(@Valid @RequestBody CheckRequest request) {
-        RecordType type = RecordType.valueOf(request.type().toUpperCase());
-        
-        CheckResult result = attendanceService.check(
+    @PostMapping("/check-in")
+    public ResponseEntity<CheckResponse> checkIn(@Valid @RequestBody CheckInRequest request) {
+        CheckInCommand command = new CheckInCommand(
             request.tenantId(),
-            request.employeeId(),
-            type
+            request.employeeId()
         );
-        
-        CheckResponse response = new CheckResponse(
+
+        CheckResult result = attendanceService.checkIn(command);
+
+        return ResponseEntity.ok(toResponse(result));
+    }
+
+    @PostMapping("/check-out")
+    public ResponseEntity<CheckResponse> checkOut(@Valid @RequestBody CheckOutRequest request) {
+        CheckOutCommand command = new CheckOutCommand(
+            request.tenantId(),
+            request.employeeId()
+        );
+
+        CheckResult result = attendanceService.checkOut(command);
+
+        return ResponseEntity.ok(toResponse(result));
+    }
+
+    private CheckResponse toResponse(CheckResult result) {
+        return new CheckResponse(
             result.recordId(),
             result.recordedAt(),
             result.dailyStatus().name()
         );
-        
-        return ResponseEntity.ok(response);
     }
 }
