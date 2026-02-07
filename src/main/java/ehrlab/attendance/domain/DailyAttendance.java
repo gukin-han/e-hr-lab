@@ -6,14 +6,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "daily_attendance", 
+@Table(name = "daily_attendance",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_daily_attendance", 
+        @UniqueConstraint(name = "uk_daily_attendance",
                          columnNames = {"tenantId", "employeeId", "workDate"})
-    },
-    indexes = {
-        @Index(name = "idx_daily_attendance_lookup", 
-               columnList = "tenantId, employeeId, workDate")
     })
 public class DailyAttendance {
 
