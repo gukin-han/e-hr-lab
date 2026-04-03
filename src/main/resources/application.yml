@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: e-hr-saas-lab
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db
+    username: root
+    password: root_password
