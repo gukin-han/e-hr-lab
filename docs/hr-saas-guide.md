@@ -190,7 +190,7 @@ hr_saas_leave       ← 휴가 모듈
 | DB | MySQL | 8.4 | JSON 컬럼, UTF8MB4 |
 | ORM | Spring Data JPA + Hibernate | 6.x | |
 | 마이그레이션 | Flyway | 최신 | `flyway-mysql` 포함 |
-| ID 생성 | uuid-creator | 6.0.0 | UUIDv7 |
+| ID 생성 | uuid-creator | 6.1.1 | UUIDv7 (com.github.f4b6a3) |
 | 테스트 | JUnit 5 + Testcontainers | | MySQL 컨테이너 |
 | 경계 검사 | ArchUnit | 1.3.x | 모듈 경계 강제 |
 | 보조 라이브러리 | Lombok, Jackson JSR310 | | |
@@ -344,7 +344,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-    implementation 'com.github.f4b6a5:uuid-creator:6.0.0'
+    implementation 'com.github.f4b6a3:uuid-creator:6.1.1'
 }
 ```
 

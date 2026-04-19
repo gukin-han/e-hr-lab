@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: ehrlab
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
