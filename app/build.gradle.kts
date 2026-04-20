@@ -1,4 +1,5 @@
 plugins {
+    id("ehrlab.java-conventions")
     id("org.springframework.boot")
 }
 

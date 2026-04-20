@@ -1,40 +1,6 @@
-plugins {
-    id("org.springframework.boot") version "4.0.5" apply false
-    id("io.spring.dependency-management") version "1.1.7" apply false
-}
-
-subprojects {
-    apply(plugin = "java")
-    apply(plugin = "io.spring.dependency-management")
-
-    group = "dev.gukin"
-    version = "0.0.1-SNAPSHOT"
-
-    repositories {
-        mavenCentral()
-    }
-
-    extensions.configure<JavaPluginExtension> {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
-        }
-    }
-
-    extensions.configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
-        imports {
-            mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.5")
-        }
-    }
-
-    dependencies {
-        "compileOnly"("org.projectlombok:lombok")
-        "annotationProcessor"("org.projectlombok:lombok")
-        "testCompileOnly"("org.projectlombok:lombok")
-        "testAnnotationProcessor"("org.projectlombok:lombok")
-        "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
-    }
-
-    tasks.withType<Test>().configureEach {
-        useJUnitPlatform()
-    }
-}
+// 루트 빌드 설정.
+// 모든 공통 설정은 buildSrc/src/main/kotlin/ehrlab.java-conventions.gradle.kts 로 이동됨.
+// Spring Boot 플러그인 버전은 buildSrc/build.gradle.kts 의 dependencies 블록에서 한 곳으로 관리.
+//
+// 이 파일은 의도적으로 비워둠 (현재 multi-project 전역 작업 없음).
+// 향후 publish, signing 같은 전역 task가 필요하면 여기에 추가.
