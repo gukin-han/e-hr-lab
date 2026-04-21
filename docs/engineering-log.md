@@ -77,3 +77,37 @@ Phase 0 STEP 3에서 `UuidToBinaryConverter` 구현 중 의문 발생. 가이드
 - 엔티티 매핑 패턴 (추후 STEP 5 Employee에서): `@JdbcTypeCode(SqlTypes.BINARY) + @Column(columnDefinition = "BINARY(16)")`
 - `docs/hr-saas-guide.md` Section 3-6 — 원래 가이드 (참고용)
 - 예정 벤치마크: Phase 4~5에 별도 브랜치
+
+---
+
+## 2026-04-21 — Spring Batch 도입 시기 예약
+
+### 맥락
+Phase 0 STEP 3 진행 중 "Spring Batch 넣을 수 있나?" 질문 제기. HR 도메인의 배치 친화성 고려하면 필수, 단 타이밍이 관건.
+
+### 결정
+- **지금 도입 X** — Phase 0은 shared-kernel 구축 포커스. Spring Batch 복잡도 추가하면 흐름 흐트러짐.
+- **Phase 3 진입 전 ADR 작성 후 도입** — 첫 job은 "연차 일괄 부여" (로직 단순 + 근기법 명문화 + 블로그 가치).
+- **구조는 ADR에서 결정** — 유력: 각 모듈 내부에 batch 서브패키지 (모듈러 모놀리스 정체성 유지).
+
+### 잠재 배치 job 목록 (Phase별 배치)
+
+| 배치 | 예상 Phase | 주기 |
+|---|---|---|
+| 연차 일괄 부여 | Phase 3 | 매년 1/1 새벽 |
+| 연차 소멸 처리 | Phase 3 | 매일 자정 |
+| 근태 일마감 집계 | Phase 4 | 매일 새벽 |
+| 월마감 정산 | Phase 4 | 매월 말일 |
+| 퇴사자 연차 정산 | Phase 5 | 퇴사일+1 |
+| Outbox relay publisher | Phase 3 직전 | 5초 간격 |
+| 개인정보 보존기간 삭제 | Phase 5 | 매일 |
+
+### 블로그 각도
+
+- 👑 **"Spring Batch로 근로기준법 기반 연차 자동 부여 구현기"** — 한국어 검색 희소
+- "Outbox Relay를 Spring Batch로 구현"
+- "배치 Job의 멱등성 — 중복 실행 방어 패턴"
+- "근태 월마감 배치 — 대량 집계 성능 튜닝기"
+
+### 체크포인트
+Phase 2 완료 시 이 엔트리 다시 읽고 ADR(`docs/adr/NN_batch_module.md`) 작성.
