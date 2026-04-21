@@ -14,8 +14,7 @@ public final class Ids {
   }
 
   public static byte[] toBytes(UUID uuid) {
-    if (uuid == null)
-      return null;
+    if (uuid == null) return null;
     ByteBuffer bb = ByteBuffer.allocate(16);
     bb.putLong(uuid.getMostSignificantBits());
     bb.putLong(uuid.getLeastSignificantBits());
