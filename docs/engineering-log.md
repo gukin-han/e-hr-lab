@@ -111,3 +111,69 @@ Phase 0 STEP 3 진행 중 "Spring Batch 넣을 수 있나?" 질문 제기. HR �
 
 ### 체크포인트
 Phase 2 완료 시 이 엔트리 다시 읽고 ADR(`docs/adr/NN_batch_module.md`) 작성.
+
+---
+
+## 2026-04-22 — 출근 자격(Attendance Eligibility) 도메인 분리 결정
+
+### 맥락
+"인사에 등록되었으면 출근할 수 있어야 하나? 권한 관리는 어떻게 하나?" 질문 제기.
+사용자 실무 사례 — 현 회사에서 **발령 이벤트가 근태 등록 트리거**라 발령 전 출근 케이스가 막혀 이슈 제보 자주 들어옴.
+
+### 핵심 통찰
+사용자 회사의 함정: **"직원 등록 = 출근 자격"으로 1:1 묶어버린 것.**
+운영 현실에선 별개 개념일 수 있음:
+- **Identity (신원)**: "우리 직원이다" — 인사 마스터 등록
+- **Assignment (발령)**: "어디 소속이다" — 행정 처리 단위
+- **Attendance Eligibility (근태 자격)**: "지금 출근 기록 만들 수 있다" — 운영 단위
+
+행정 단위와 운영 단위를 같은 게이트로 묶으면 행정 처리 지연이 모든 운영을 막음.
+
+### 결정 — Policy Resolver 패턴 (가이드 3-7과 일관)
+
+**인사 모듈이 출근 자격 정책의 SSOT.** 근태는 결과만 받음.
+
+```java
+// 인사 api
+EmployeeService.resolveEligibility(employeeId, when)
+  → AttendanceEligibility(eligible, workplaceId, reason)
+
+// 근태
+checkIn(employeeId) {
+    if (!hrService.resolveEligibility(...).eligible()) reject()
+}
+```
+
+비즈니스 룰은 인사 모듈 내부에서 자유 조립:
+- ACTIVE + 발령 있음 → OK (정상 경로)
+- ACTIVE + 발령 없음 + 사전 출근 허가 → OK (예외 경로, 임시 사업장)
+- ON_LEAVE / RESIGNED → 거부
+
+### 통신 패턴
+
+| 정보 | 동기화 | 이유 |
+|---|---|---|
+| 직원 기본 정보 (read model) | 이벤트 | eventual OK, 빈번 조회 |
+| **출근 자격 결정** | **API 동기 호출** | 강한 일관성, 정책 변경 즉시 반영 |
+
+→ **데이터 sync는 이벤트, 의사결정은 API.** 둘 다 활용.
+
+### 함정 경고 (체크리스트)
+
+- [ ] 자격 정책을 근태가 소유 X (인사가 통제)
+- [ ] eligibility 결과 캐싱 X (출근마다 새로 조회 — 그 사이 퇴사 가능)
+- [ ] "인사 등록 = 자동 출근 가능"으로 단축 X (명시적 게이트)
+
+### 블로그 각도
+
+- 👑 **"인사 등록 = 출근 자격? 우리가 분리한 이유"** — 사용자 회사 안티패턴 사례 + 우리 설계 비교
+- "Modular Monolith에서 정책의 위치 — Policy Resolver 패턴"
+- "발령 행정과 운영 자격을 분리하는 도메인 모델링"
+
+### 코드 포인터 (예정)
+- Phase 2 시작 시 ADR 작성: `docs/adr/02_attendance_eligibility_policy.md`
+- `modules/hr/api/EmployeeService.resolveEligibility()` 설계
+- `modules/hr/domain/AttendanceEligibility` 도메인 객체
+
+### 체크포인트
+Phase 2 인사 모듈 진입 시 이 엔트리 + ADR로 정식 의사결정.
