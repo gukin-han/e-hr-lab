@@ -47,6 +47,10 @@ e-hr-lab/
 
 2. [엔지니어링 로그](docs/engineering-log.md) — Phase 진행 중 의사결정과 트레이드오프 기록. Phase 종료 시 블로그 초안 재료.
 
+### Architecture Decision Records (`docs/adr/`)
+
+- [ADR 001: Request Context 전파 — Explicit Parameter 채택](docs/adr/001_request_context_propagation.md) — ThreadLocal 폐기, 비동기 안전한 명시 전달 패턴
+
 ### 학습 레퍼런스 (`docs/learning/`)
 
 3. [Gradle 멀티모듈 의존성](docs/learning/gradle-multimodule-dependencies.md) — 9개 `.gradle.kts` 파일 지도, `implementation`/`api`/`compileOnly` 차이, 의존성 그래프 시각화
@@ -60,12 +64,13 @@ e-hr-lab/
 - ✅ STEP 2: Docker Compose로 MySQL 4개 DATABASE 기동
 - 🔄 STEP 3: shared-kernel 핵심 컴포넌트 구현
   - [x] Ids (UUIDv7 생성 + toBytes/fromBytes + 스모크 테스트)
-  - [ ] TenantContext + TenantFilter
-  - [ ] CorrelationContext
+  - [ ] RequestContext (Explicit Context 패턴, [ADR 001](docs/adr/001_request_context_propagation.md))
   - [ ] OutboxWriter ⭐
 - ⬜ STEP 4: Flyway로 복수 DATABASE 초기화
 - ⬜ STEP 5: 인사 모듈 최소 구현
 - ⬜ STEP 6: ArchUnit으로 모듈 경계 강제
 - ⬜ STEP 7~9: Testcontainers, GitHub Actions CI, 문서화
 
-**다음 작업:** STEP 3-2 — TenantContext + TenantFilter (ThreadLocal + OncePerRequestFilter 패턴)
+**다음 작업:** STEP 3-2 — RequestContext record 작성 (`shared-kernel/.../context/RequestContext.java`)
+
+> ℹ️ 가이드 원안의 `TenantContext` / `TenantFilter` / `CorrelationContext`는 ThreadLocal 비동기 함정 회피를 위해 폐기. [ADR 001](docs/adr/001_request_context_propagation.md) 참조.

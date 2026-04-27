@@ -177,3 +177,51 @@ checkIn(employeeId) {
 
 ### 체크포인트
 Phase 2 인사 모듈 진입 시 이 엔트리 + ADR로 정식 의사결정.
+
+---
+
+## 2026-04-28 — Request Context: ThreadLocal 폐기, Explicit Parameter 채택
+
+### 맥락
+STEP 3 진행 중 가이드의 ThreadLocal 패턴(`TenantContext` + `TenantFilter` + `CorrelationContext`) 도입 시점에 사용자 실무 경험이 결정을 뒤집음.
+
+### 사용자 실무 경험 (휘발 방지용 박제)
+사용자 회사에서 ThreadLocal로 테넌트 정보 관리하다가:
+- **비동기 처리 내에서 ThreadLocal에 접근 못 해 컨텍스트 유실**
+- 결국 **모든 서비스 메서드가 컨텍스트를 파라미터로 받도록 전환**
+- **Inbound 레이어(컨트롤러)에서 명시적으로 입력**하는 패턴으로 정착
+
+→ 한국 실무에서 검증된 ThreadLocal의 함정. 동일 길을 의도적으로 회피.
+
+### 결정
+1. `TenantContext`, `TenantFilter`, `CorrelationContext` **만들지 않음**
+2. `RequestContext(tenantId, correlationId)` record 1개로 통합
+3. 도메인 서비스 메서드의 첫 인자로 명시적 전달
+4. Controller에서 `@RequestHeader("X-Tenant-Id")`로 헤더 직접 수신
+
+상세: `docs/adr/001_request_context_propagation.md`
+
+### 함정 / 인사이트
+- **ThreadLocal은 동기 호출 한정 안전.** `@Async`, `CompletableFuture.supplyAsync`, Reactive(WebFlux), Virtual Thread inheritability 모두 함정 있음.
+- **Reactive 진영은 처음부터 ThreadLocal 못 씀.** Spring Reactor의 `Context`가 별도 메커니즘. 즉 ThreadLocal로 만든 코드는 WebFlux 전환 시 통째로 재작성.
+- **Java Project Loom의 ScopedValue (JEP 429, Java 22+ preview)** 가 ThreadLocal 한계를 공식 인정한 결과물. Explicit 패턴은 ScopedValue 전환 시 변경 최소.
+- **테스트 차이 큼**: ThreadLocal 방식은 매 테스트마다 set/clear 라이프사이클 관리. Explicit은 그냥 인자 전달.
+- **명시성의 대가는 파라미터 +1**: 메서드 시그니처에 `ctx`가 항상 등장. 깔끔함 vs 안전성 트레이드오프에서 안전성 우선.
+
+### 가이드 문서와의 차이
+가이드 `STEP 3-3, 3-4`는 SB3 시절 패턴(ThreadLocal). 우리는 의도적 이탈. 차이 인지하고 진행. 향후 가이드 갱신 시 이 결정 반영.
+
+### 블로그 각도
+
+- 👑 **"한국 SaaS의 ThreadLocal 멀티테넌시 — 우리는 왜 깨져본 후 Explicit Context로 갔나"** — 사용자 실무 사례 + 우리 사전 회피 + ADR 이미지
+- "Spring 멀티테넌시 — ThreadLocal vs Explicit Parameter vs ScopedValue 비교"
+- "Reactive 전환 가능성을 처음부터 열어두는 Context 설계"
+- "ScopedValue가 도착하기 전 우리가 할 수 있는 최선"
+
+### 코드 포인터 (예정)
+- `shared-kernel/src/main/java/dev/gukin/ehrlab/shared/context/RequestContext.java` — 신규
+- `shared-kernel/.../outbox/OutboxWriter.java` — `append(RequestContext, DomainEvent)` 시그니처
+- `app/.../EmployeeController` (추후 STEP 5) — `@RequestHeader` 사용 예시
+
+### 체크포인트
+Phase 6 즈음 Reactive(WebFlux) 검토 시 이 결정의 효과 회고. ScopedValue 정식 GA 시 마이그레이션 ADR 추가.
