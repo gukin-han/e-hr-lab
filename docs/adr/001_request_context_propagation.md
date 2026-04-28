@@ -6,18 +6,20 @@
 
 ## 맥락
 
-멀티 테넌트 SaaS에서 **요청의 테넌트 ID, 상관관계(correlation) ID**를 컨트롤러부터 도메인 서비스, 인프라(OutboxWriter 등)까지 어떻게 전파할 것인가.
+멀티 테넌트 SaaS에서 **요청의 테넌트 ID, 분산 추적 ID(traceId)**를 컨트롤러부터 도메인 서비스, 인프라(OutboxWriter 등)까지 어떻게 전파할 것인가.
 
 가이드 문서(`docs/hr-saas-guide.md` STEP 3-3)는 ThreadLocal 기반 `TenantContext` + `TenantFilter` 패턴을 제시. 그러나 사용자 실무 경험에서 **ThreadLocal이 비동기 호출 시 깨지는 사례**가 보고되어 재평가 필요.
+
+> **명명 결정**: `correlationId` 대신 **`traceId`** 채택. W3C Trace Context 및 OpenTelemetry 표준이 `traceId`를 사용하며, Spring Cloud Sleuth → Micrometer Tracing 진화 흐름과 일관됨. 향후 OTel 통합 시 매핑 비용 0.
 
 ## 결정
 
 **ThreadLocal 폐기. Explicit Parameter 패턴 채택.**
 
-`RequestContext` record 하나로 테넌트/상관관계 ID를 묶고, 모든 도메인 서비스 메서드의 첫 번째 파라미터로 명시적 전달.
+`RequestContext` record 하나로 테넌트 ID와 trace ID를 묶고, 모든 도메인 서비스 메서드의 첫 번째 파라미터로 명시적 전달.
 
 ```java
-public record RequestContext(UUID tenantId, UUID correlationId) {
+public record RequestContext(UUID tenantId, UUID traceId) {
     public static RequestContext of(UUID tenantId) {
         return new RequestContext(tenantId, Ids.generate());
     }

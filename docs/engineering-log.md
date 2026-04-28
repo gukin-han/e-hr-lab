@@ -195,7 +195,7 @@ STEP 3 진행 중 가이드의 ThreadLocal 패턴(`TenantContext` + `TenantFilte
 
 ### 결정
 1. `TenantContext`, `TenantFilter`, `CorrelationContext` **만들지 않음**
-2. `RequestContext(tenantId, correlationId)` record 1개로 통합
+2. `RequestContext(tenantId, traceId)` record 1개로 통합 (W3C Trace Context / OpenTelemetry 표준 명명 채택)
 3. 도메인 서비스 메서드의 첫 인자로 명시적 전달
 4. Controller에서 `@RequestHeader("X-Tenant-Id")`로 헤더 직접 수신
 
