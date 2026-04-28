@@ -51,6 +51,12 @@ e-hr-lab/
 
 - [ADR 001: Request Context 전파 — Explicit Parameter 채택](docs/adr/001_request_context_propagation.md) — ThreadLocal 폐기, 비동기 안전한 명시 전달 패턴
 
+### 컴포넌트 가이드 (`docs/guides/`)
+
+각 컴포넌트 작성 전 멘토링 가이드. 왜 / 함정 / 요구사항 / Q&A. 파일명은 `{phase}-{step}-{sub}-{name}.md` 형식.
+
+- [0-3-3 OutboxWriter](docs/guides/0-3-3-outbox-writer.md) — Outbox 패턴 + DomainEvent 인터페이스
+
 ### 학습 레퍼런스 (`docs/learning/`)
 
 3. [Gradle 멀티모듈 의존성](docs/learning/gradle-multimodule-dependencies.md) — 9개 `.gradle.kts` 파일 지도, `implementation`/`api`/`compileOnly` 차이, 의존성 그래프 시각화
